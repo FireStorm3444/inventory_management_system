@@ -31,7 +31,7 @@ ENV PYTHONUNBUFFERED=1 \
     PATH="/app/.venv/bin:$PATH"
 
 # Security baseline: Run as an unprivileged system user, not root
-RUN useradd -m -u 1001 imsuser
+RUN useradd -m -u 1000 imsuser
 
 WORKDIR /app
 

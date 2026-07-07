@@ -44,22 +44,29 @@ def receive_do_orm_execute(orm_execute_state: ORMExecuteState) -> None:
     if is_system_bypass_active():
         return
 
-    # Apply loader criteria to SELECT, bulk UPDATE, and bulk DELETE queries.
-    # Exclude secondary relationship/column loads to prevent duplicate filtering clauses.
+    # Apply criteria to SELECT, UPDATE, and DELETE.
+    # Note: We removed the `is_relationship_load` guard so that lazy-loaded queries
+    # trigger this hook and get properly filtered too!
     if (
-        (orm_execute_state.is_select or orm_execute_state.is_update or orm_execute_state.is_delete)
-        and not orm_execute_state.is_column_load
-        and not orm_execute_state.is_relationship_load
-    ):
+        orm_execute_state.is_select or orm_execute_state.is_update or orm_execute_state.is_delete
+    ) and not orm_execute_state.is_column_load:
         active_tenant_id = get_tenant_id()  # Fail-closed if context is missing
+        options = []
 
-        orm_execute_state.statement = orm_execute_state.statement.options(
-            with_loader_criteria(
-                TenantBase,
-                lambda cls: cls.tenant_id == active_tenant_id,
-                include_aliases=True,
-            )
-        )
+        # Iterate over all concrete table mappers involved in this specific query
+        for mapper in orm_execute_state.all_mappers:
+            if issubclass(mapper.class_, TenantBase):
+                options.append(
+                    with_loader_criteria(
+                        mapper.class_,  # Pass the concrete table (e.g., StockLocation) safely
+                        lambda cls: cls.tenant_id == active_tenant_id,
+                        include_aliases=True,
+                    )
+                )
+
+        # Inject all dynamically generated isolation criteria into the statement
+        if options:
+            orm_execute_state.statement = orm_execute_state.statement.options(*options)
 
 
 # ==========================================

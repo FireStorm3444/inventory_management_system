@@ -47,3 +47,8 @@ alembic-apply:
 # Rollback the database schema exactly one revision backwards
 alembic-undo:
 	@uv run alembic downgrade -1
+
+# Run the Pytest verification suite
+test:
+	@echo "🧪 Running Async Test Suite..."
+	docker compose exec web uv run pytest -v

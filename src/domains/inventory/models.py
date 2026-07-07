@@ -2,7 +2,7 @@ import uuid
 from datetime import UTC, datetime
 from typing import Any, ClassVar
 
-from sqlalchemy import CheckConstraint, UniqueConstraint
+from sqlalchemy import CheckConstraint, DateTime, UniqueConstraint
 from sqlmodel import Field
 from src.core.models import TenantBase
 
@@ -22,7 +22,11 @@ class StockLocation(TenantBase, table=True):
     code: str = Field(index=True, max_length=30)  # e.g., 'WH-MAIN', 'BIN-A1'
     is_default: bool = Field(default=False)
     is_sellable: bool = Field(default=True)  # False for 'Damaged/Returns' bins
-    created_at: datetime = Field(default_factory=get_utc_now)
+    created_at: datetime = Field(
+        default_factory=get_utc_now,
+        sa_type=DateTime(timezone=True),
+        sa_column_kwargs={"onupdate": get_utc_now},
+    )
 
     __table_args__: ClassVar[tuple[Any, ...]] = (
         UniqueConstraint("tenant_id", "code", name="uq_tenant_location_code"),
@@ -43,7 +47,11 @@ class StockBalance(TenantBase, table=True):
     # Stock held in customer carts / draft invoices waiting for checkout
     reserved_qty: int = Field(default=0)
 
-    updated_at: datetime = Field(default_factory=get_utc_now)
+    updated_at: datetime = Field(
+        default_factory=get_utc_now,
+        sa_type=DateTime(timezone=True),
+        sa_column_kwargs={"onupdate": get_utc_now},
+    )
 
     # Database-level guarantees: Hard system abort if quantities go below 0 or over-reserve
     __table_args__: ClassVar[tuple[Any, ...]] = (
@@ -77,7 +85,11 @@ class StockLedger(TenantBase, table=True):
     reference_id: str | None = Field(default=None, index=True)  # Order ID / PO Number
     idempotency_key: str = Field(index=True, max_length=100)  # Prevents network double-deductions
 
-    created_at: datetime = Field(default_factory=get_utc_now)
+    created_at: datetime = Field(
+        default_factory=get_utc_now,
+        sa_type=DateTime(timezone=True),
+        sa_column_kwargs={"onupdate": get_utc_now},
+    )
 
     __table_args__: ClassVar[tuple[Any, ...]] = (
         UniqueConstraint("tenant_id", "idempotency_key", name="uq_tenant_idempotency"),
