@@ -29,6 +29,7 @@ dev = [
 target-version = "py314"
 line-length = 100
 src = ["src"]
+exclude = ["alembic/versions/*.py"]
 
 [tool.ruff.lint]
 select = [
