@@ -3,6 +3,7 @@ import logging
 from typing import Any
 
 from fastapi import Request, status
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, Response
 
 logger = logging.getLogger(__name__)
@@ -77,4 +78,37 @@ async def global_exception_handler(request: Request, exc: Exception) -> Response
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={"error": "InternalServerError", "message": "An unexpected error occurred."},
+    )
+
+
+async def htmx_validation_exception_handler(request: Request, exc: Exception) -> Response:
+    """
+    Intercepts Pydantic schema validation errors.
+    Translates JSON 422s into Alpine.js UI toasts for HTMX clients.
+    """
+    # Use type narrowing to satisfy Starlette's signature while keeping ty happy
+    if not isinstance(exc, RequestValidationError):
+        return await global_exception_handler(request, exc)
+
+    # From this point on, 'ty' knows 'exc' is strictly a RequestValidationError
+    errors = exc.errors()
+    error_msg = "Invalid request payload."
+
+    if errors:
+        first_error = errors[0]
+        # Clean up the field location path
+        field_path = " -> ".join(
+            str(loc) for loc in first_error.get("loc", []) if loc not in ("body", "query", "path")
+        )
+        raw_msg = first_error.get("msg", "")
+        error_msg = f"{field_path}: {raw_msg}" if field_path else raw_msg
+
+    # Content Negotiation: Check if this is an HTMX request
+    if is_htmx_request(request):
+        logger.warning("HTMX_VALIDATION_BLOCKED | %s", error_msg)
+        return htmx_toast_response(message=error_msg, level="error")
+
+    # Standard API Fallback
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, content={"detail": errors}
     )
