@@ -51,7 +51,23 @@ select = [
     "B",  # flake8-bugbear (catches common architectural gotchas)
     "UP", # pyupgrade (forces modern Python 3.14 syntax)
 ]
+
 ignore = ["E501"] # Handled by the formatter
+
+[tool.ruff.lint.flake8-bugbear]
+# Inform the linter that FastAPI parameter injections are safe and immutable
+extend-immutable-calls = [
+    "fastapi.Depends", 
+    "fastapi.params.Depends",
+    "fastapi.Query",
+    "fastapi.params.Query",
+    "fastapi.Header",
+    "fastapi.params.Header",
+    "fastapi.Path",
+    "fastapi.params.Path",
+    "fastapi.Body",
+    "fastapi.params.Body"
+]
 
 [tool.ruff.format]
 quote-style = "double"
