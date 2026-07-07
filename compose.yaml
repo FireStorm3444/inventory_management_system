@@ -1,0 +1,44 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ims_web_app
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://imsadmin:imspassword@db:5432/ims_db
+      - ENVIRONMENT=development
+    volumes:
+      # Mount your local source folder into the container for live hot-reloading
+      - .:/app
+      # Isolate the container's virtual environment from your host machine's venv
+      - /app/.venv
+    # Override production CMD to enable uvicorn development hot-reloading
+    command: ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+      image: postgres:18-alpine
+      container_name: ims_postgres_db
+      restart: unless-stopped
+      environment:
+        POSTGRES_USER: imsadmin
+        POSTGRES_PASSWORD: imspassword
+        POSTGRES_DB: ims_db
+      ports:
+        - "5433:5432"
+      volumes:
+        - pg_data:/var/lib/postgresql
+      healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U imsadmin -d ims_db"]
+        interval: 3s
+        timeout: 3s
+        retries: 5
+        start_period: 15s  # Prevents healthcheck failures during first-boot cluster creation
+
+volumes:
+  pg_data:

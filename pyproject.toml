@@ -1,0 +1,58 @@
+[project]
+name = "IMS"
+version = "0.1.0"
+description = "Enterprise Inventory Management System"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "alembic>=1.18.5",
+    "asyncpg>=0.31.0",
+    "fastapi>=0.139.0",
+    "jinja2>=3.1.5",
+    "pydantic>=2.10.0",
+    "pydantic-settings>=2.14.2",
+    "python-multipart>=0.0.20",
+    "sqlmodel>=0.0.22",
+    "uvicorn>=0.34.0",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.9.0",
+    "ty>=0.0.56",
+]
+
+# ==========================================
+# RUFF (Linter & Formatter)
+# ==========================================
+[tool.ruff]
+target-version = "py314"
+line-length = 100
+src = ["src"]
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort (auto-sorting imports)
+    "B",  # flake8-bugbear (catches common architectural gotchas)
+    "UP", # pyupgrade (forces modern Python 3.14 syntax)
+]
+ignore = ["E501"] # Handled by the formatter
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.uv]
+
+# ==========================================
+# TY (Static Type Checker)
+# ==========================================
+[tool.ty.src]
+include = ["src"]
+
+[tool.ty.rules]
+all = "error"
+unused-ignore-comment = "warn"
