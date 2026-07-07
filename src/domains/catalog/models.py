@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 from decimal import Decimal
 from typing import ClassVar
 
-from sqlalchemy import DateTime
+from sqlalchemy import Column, DateTime
 from sqlmodel import Field
 from src.core.models import TenantBase
 
@@ -21,8 +21,7 @@ class Category(TenantBase, table=True):
     description: str | None = Field(default=None)
     created_at: datetime = Field(
         default_factory=get_utc_now,
-        sa_type=DateTime(timezone=True),
-        sa_column_kwargs={"onupdate": get_utc_now},
+        sa_column=Column(DateTime(timezone=True)),
     )
 
 
@@ -37,11 +36,9 @@ class Product(TenantBase, table=True):
     is_active: bool = Field(default=True)
     created_at: datetime = Field(
         default_factory=get_utc_now,
-        sa_type=DateTime(timezone=True),
-        sa_column_kwargs={"onupdate": get_utc_now},
+        sa_column=Column(DateTime(timezone=True)),
     )
     updated_at: datetime = Field(
         default_factory=get_utc_now,
-        sa_type=DateTime(timezone=True),
-        sa_column_kwargs={"onupdate": get_utc_now},
+        sa_column=Column(DateTime(timezone=True), onupdate=get_utc_now),
     )

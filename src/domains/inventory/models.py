@@ -2,7 +2,7 @@ import uuid
 from datetime import UTC, datetime
 from typing import Any, ClassVar
 
-from sqlalchemy import CheckConstraint, DateTime, UniqueConstraint
+from sqlalchemy import CheckConstraint, Column, DateTime, UniqueConstraint
 from sqlmodel import Field
 from src.core.models import TenantBase
 
@@ -24,8 +24,7 @@ class StockLocation(TenantBase, table=True):
     is_sellable: bool = Field(default=True)  # False for 'Damaged/Returns' bins
     created_at: datetime = Field(
         default_factory=get_utc_now,
-        sa_type=DateTime(timezone=True),
-        sa_column_kwargs={"onupdate": get_utc_now},
+        sa_column=Column(DateTime(timezone=True)),
     )
 
     __table_args__: ClassVar[tuple[Any, ...]] = (
@@ -49,8 +48,7 @@ class StockBalance(TenantBase, table=True):
 
     updated_at: datetime = Field(
         default_factory=get_utc_now,
-        sa_type=DateTime(timezone=True),
-        sa_column_kwargs={"onupdate": get_utc_now},
+        sa_column=Column(DateTime(timezone=True), onupdate=get_utc_now),
     )
 
     # Database-level guarantees: Hard system abort if quantities go below 0 or over-reserve
@@ -87,8 +85,7 @@ class StockLedger(TenantBase, table=True):
 
     created_at: datetime = Field(
         default_factory=get_utc_now,
-        sa_type=DateTime(timezone=True),
-        sa_column_kwargs={"onupdate": get_utc_now},
+        sa_column=Column(DateTime(timezone=True)),
     )
 
     __table_args__: ClassVar[tuple[Any, ...]] = (
