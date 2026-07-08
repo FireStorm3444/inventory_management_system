@@ -110,5 +110,5 @@ async def htmx_validation_exception_handler(request: Request, exc: Exception) ->
 
     # Standard API Fallback
     return JSONResponse(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, content={"detail": errors}
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, content={"detail": errors}
     )
