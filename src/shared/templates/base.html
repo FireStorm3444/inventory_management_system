@@ -43,6 +43,24 @@
         <div id="main-viewport" class="p-6 flex-1 overflow-y-auto">
             {% block content %}{% endblock %}
         </div>
+        <div class="relative w-full max-w-2xl">
+            <input type="text"
+                   name="q"
+                   class="w-full px-4 py-3 border border-slate-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm"
+                   placeholder="Scan or type SKU / Product Name..."
+                   autocomplete="off"
+                   hx-get="/api/catalog/search"
+                   hx-trigger="keyup changed delay:50ms, search"
+                   hx-target="#search-results"
+                   hx-indicator="#search-spinner" />
+        
+            <div id="search-spinner" class="htmx-indicator absolute right-3 top-3">
+                <div class="animate-spin h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+            </div>
+        
+            <div id="search-results" class="absolute w-full mt-1 bg-white shadow-xl rounded-lg border border-slate-200 z-50 empty:hidden overflow-hidden">
+                </div>
+        </div>
     </main>
 
 </body>

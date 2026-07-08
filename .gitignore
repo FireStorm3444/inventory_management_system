@@ -16,3 +16,5 @@ wheels/
 *.txt
 
 agent.md
+
+target/

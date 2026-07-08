@@ -30,10 +30,14 @@ check:
 	@uv run ty check
 	@echo "⚡ Running Ruff Linter..."
 	@uv run ruff check src/
+	@echo "⚡ Running Rust Clippy (Linter)..."
+	cd src/rust_engine && cargo clippy -- -D warnings
 
 format:
 	@uv run ruff format src/
 	@uv run ruff check --fix src/
+	@echo "⚡ Formatting Rust with rustfmt..."
+	cd src/rust_engine && cargo fmt
 
 # Generate a new auto-detected migration file based on model changes
 # Usage: make migrate-gen msg="Added discount column to products"
@@ -51,4 +55,4 @@ alembic-undo:
 # Run the Pytest verification suite
 test:
 	@echo "🧪 Running Async Test Suite..."
-	docker compose exec web uv run pytest -v
+	docker compose exec web uv run --no-sync pytest -v

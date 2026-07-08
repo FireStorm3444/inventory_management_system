@@ -13,6 +13,7 @@ dependencies = [
     "pydantic>=2.10.0",
     "pydantic-settings>=2.14.2",
     "python-multipart>=0.0.20",
+    "rust-engine",
     "sqlmodel>=0.0.22",
     "uvicorn>=0.34.0",
 ]
@@ -79,6 +80,9 @@ quote-style = "double"
 indent-style = "space"
 
 [tool.uv]
+
+[tool.uv.sources]
+rust-engine = { path = "./src/rust_engine", editable = false }
 
 # ==========================================
 # TY (Static Type Checker)

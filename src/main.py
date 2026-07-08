@@ -1,5 +1,4 @@
 import logging
-from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 import src.domains.catalog.models  # noqa: F401
@@ -9,8 +8,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-
-# ... [other imports] ...
+from src.core.database import AsyncSessionLocal
 from src.core.errors import (
     global_exception_handler,
     htmx_validation_exception_handler,
@@ -20,6 +18,7 @@ from src.core.errors import (
 from src.core.security.context import SecurityViolationError
 from src.core.security.middleware import TenantScopingMiddleware
 from src.domains.catalog.router import router as catalog_router
+from src.domains.catalog.services.discovery import hydrate_catalog_graph
 from src.domains.inventory.exceptions import InventoryDomainError
 from src.domains.inventory.router import router as inventory_router
 
@@ -27,10 +26,27 @@ logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    """Execute application startup tasks."""
-    # Alembic handles schema initialization before application boot
+async def lifespan(app: FastAPI):
+    """
+    FastAPI Bootloader & Teardown Sequence.
+    Executes exactly once when the Docker container spins up.
+    """
+    logger.info("SYSTEM_BOOT | Initializing IMS Enterprise SaaS...")
+
+    # 1. Hydrate the Rust Discovery Engine
+    try:
+        # Create an isolated bootloader session
+        async with AsyncSessionLocal() as session:
+            await hydrate_catalog_graph(session)
+    except Exception as e:
+        logger.error(
+            "CRITICAL: Failed to hydrate Rust engine. Autocomplete offline. Error: %s", str(e)
+        )
+
+    # Yield control back to FastAPI to start accepting network traffic
     yield
+
+    logger.info("SYSTEM_SHUTDOWN | Flushing active states...")
 
 
 app = FastAPI(

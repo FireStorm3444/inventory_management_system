@@ -7,12 +7,13 @@ import tempfile
 import urllib.parse
 from typing import Any
 
-from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, UploadFile, status
 from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.core.database import get_db
 from src.core.idempotency import get_idempotency_key
 from src.core.security.context import get_tenant_id  # Multi-tenant scoping
+from src.domains.catalog.services.discovery import discovery_engine
 from src.domains.catalog.services.ingestion import execute_catalog_ingestion
 from starlette.concurrency import run_in_threadpool
 
@@ -129,3 +130,46 @@ async def api_upload_catalog(
     finally:
         if os.path.exists(temp_path):
             os.remove(temp_path)
+
+
+@router.get("/search", response_class=HTMLResponse)
+async def api_search_catalog(
+    request: Request, q: str = Query(default="", description="Prefix search term")
+) -> HTMLResponse:
+    """
+    Ultra-fast HTMX autocomplete endpoint powered by the Rust memory graph.
+    """
+    # 1. Prevent useless single-character DFS traversals
+    if not q or len(q.strip()) < 2:
+        return HTMLResponse(content="")
+
+    # 2. Zero-Trust Security: Lock search to the active tenant
+    tenant_id = get_tenant_id()
+
+    # 3. Rust Execution: Drops GIL, traverses Trie, returns native Python DTOs
+    results = discovery_engine.search(tenant_id, q, limit=10)
+
+    if not results:
+        return HTMLResponse(
+            content='<div class="p-3 text-sm text-slate-500 italic">No products found.</div>'
+        )
+
+    # 4. Build the HTMX Dropdown Fragment
+    html_parts = []
+    for item in results:
+        html_parts.append(f"""
+        <div class="px-4 py-2 hover:bg-slate-100 cursor-pointer border-b border-slate-100 last:border-0 transition-colors"
+             hx-get="/api/catalog/items/{item.id}"
+             hx-target="#selected-item"
+             hx-swap="innerHTML">
+            <div class="flex justify-between items-center">
+                <div>
+                    <span class="font-bold text-slate-800">{item.sku}</span>
+                    <span class="text-sm text-slate-600 ml-2">{item.name}</span>
+                </div>
+                <span class="text-blue-600 font-mono text-sm font-semibold">${item.price:.2f}</span>
+            </div>
+        </div>
+        """)
+
+    return HTMLResponse(content="".join(html_parts))
