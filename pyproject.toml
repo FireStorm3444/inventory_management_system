@@ -9,6 +9,7 @@ dependencies = [
     "asyncpg>=0.31.0",
     "fastapi>=0.139.0",
     "jinja2>=3.1.5",
+    "polars>=1.42.1",
     "pydantic>=2.10.0",
     "pydantic-settings>=2.14.2",
     "python-multipart>=0.0.20",
@@ -57,7 +58,7 @@ ignore = ["E501"] # Handled by the formatter
 [tool.ruff.lint.flake8-bugbear]
 # Inform the linter that FastAPI parameter injections are safe and immutable
 extend-immutable-calls = [
-    "fastapi.Depends", 
+    "fastapi.Depends",
     "fastapi.params.Depends",
     "fastapi.Query",
     "fastapi.params.Query",
@@ -66,7 +67,11 @@ extend-immutable-calls = [
     "fastapi.Path",
     "fastapi.params.Path",
     "fastapi.Body",
-    "fastapi.params.Body"
+    "fastapi.params.Body",
+    "fastapi.File",
+    "fastapi.params.File",
+    "fastapi.Form",
+    "fastapi.params.Form"
 ]
 
 [tool.ruff.format]
@@ -78,6 +83,9 @@ indent-style = "space"
 # ==========================================
 # TY (Static Type Checker)
 # ==========================================
+[tool.ty.environment]
+python = ".venv"
+
 [tool.ty.src]
 include = ["src"]
 
