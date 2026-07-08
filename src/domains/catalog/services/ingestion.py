@@ -143,11 +143,7 @@ async def process_catalog_stream(
         # 1. Lowercase and strip columns
         df = df.rename({col: col.strip().lower() for col in df.columns})
 
-        schema_map = {
-            "item sku": "sku",
-            "product name": "name",
-            "cost": "price"
-        }
+        schema_map = {"item sku": "sku", "product name": "name", "cost": "price"}
         available_mappings = {k: v for k, v in schema_map.items() if k in df.columns}
         df = df.rename(available_mappings)
 
