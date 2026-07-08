@@ -2,7 +2,7 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.core.security.context import reset_tenant_id, set_tenant_id
 
-# FIX: Import the Product model to satisfy the Foreign Key constraint
+# Import the Product model to satisfy the Foreign Key constraint
 from src.domains.catalog.models import Product
 from src.domains.inventory.exceptions import InsufficientStockError
 from src.domains.inventory.service import adjust_stock, get_or_create_default_location
@@ -19,7 +19,7 @@ async def test_negative_stock_prevention(db_session: AsyncSession) -> None:
         # 2. Get the default warehouse location
         location = await get_or_create_default_location(db_session)
 
-        # FIX: Create a real product in the database so the StockBalance FK constraint passes
+        # Create a real product in the database so the StockBalance FK constraint passes
         product = Product(sku="TEST-SKU-001", name="Test Widget", price=9.99)
         db_session.add(product)
         await db_session.flush()

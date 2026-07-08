@@ -18,7 +18,7 @@ TEST_DATABASE_URL = settings.async_database_url.replace("/ims_db", "/ims_db_test
 async def db_engine() -> AsyncGenerator[AsyncEngine]:
     """Create a single database engine for the entire test session."""
 
-    # FIX: Use NullPool to prevent asyncpg from binding pooled connections
+    # Use NullPool to prevent asyncpg from binding pooled connections
     # to the wrong asyncio event loop!
     engine = create_async_engine(TEST_DATABASE_URL, poolclass=NullPool, echo=False)
 

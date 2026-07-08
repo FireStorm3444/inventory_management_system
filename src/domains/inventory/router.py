@@ -63,7 +63,7 @@ async def api_checkout_cart(
 ):
     """Idempotent endpoint to securely checkout a multi-item cart."""
 
-    # FIX: Map inbound network schema lines to pure domain DTOs
+    # Map inbound network schema lines to pure domain DTOs
     domain_items = [
         CartItemDTO(
             product_id=item.product_id,

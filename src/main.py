@@ -19,6 +19,7 @@ from src.core.errors import (
 )
 from src.core.security.context import SecurityViolationError
 from src.core.security.middleware import TenantScopingMiddleware
+from src.domains.catalog.router import router as catalog_router
 from src.domains.inventory.exceptions import InventoryDomainError
 from src.domains.inventory.router import router as inventory_router
 
@@ -55,6 +56,7 @@ app.mount("/static", StaticFiles(directory="src/shared/static"), name="static")
 
 templates = Jinja2Templates(directory="src/shared/templates")
 
+app.include_router(catalog_router)
 app.include_router(inventory_router)
 
 
