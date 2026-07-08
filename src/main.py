@@ -45,7 +45,9 @@ app.add_middleware(TenantScopingMiddleware)
 # --- Register Global Exception Handlers ---
 app.add_exception_handler(SecurityViolationError, security_violation_handler)
 app.add_exception_handler(InventoryDomainError, inventory_domain_handler)
-app.add_exception_handler(RequestValidationError, htmx_validation_exception_handler)  # <-- REGISTER HERE
+app.add_exception_handler(
+    RequestValidationError, htmx_validation_exception_handler
+)  # <-- REGISTER HERE
 app.add_exception_handler(Exception, global_exception_handler)
 
 # Mount static directory for vendored HTMX, Alpine, and CSS
