@@ -1,12 +1,11 @@
 import logging
 from typing import Any
 
-from sqlalchemy import select  # <-- FIX 2: Use SQLAlchemy's unbounded select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import col
 from src.domains.catalog.models import Product
 
-# FIX 1 & 3: Safely alias the C-extension as Any to bypass static checker blindness
 import rust_engine as _rust_engine
 
 rust_engine: Any = _rust_engine
